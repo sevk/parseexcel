@@ -592,7 +592,7 @@ module Spreadsheet
 				idx = work[0,2].unpack('v').first
 				@workbook.add_text_format(idx, fmt)
 			end
-			
+
 			def formula(op, len, work) # DK:P336
 				row, col, fmt = work.unpack('v3')
 				flag = work[12,2].unpack('v')

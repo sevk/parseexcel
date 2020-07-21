@@ -65,13 +65,16 @@ module Spreadsheet
 				0x31 => "@",
 			}
       begin
-        require 'iconv'
-        iconv = Iconv.new('utf16le', 'latin1')
+        a= "UTF-16LE"
+        b="UTF-8"
+        #b="ascii"
         @@fmt_strs = @@fmt_strs.inject({}) { |memo, (key, val)|
-          memo.store(key, iconv.iconv(val))
+          memo.store(key, val.code_a2b(a,b))
           memo
         }
+
       rescue
+        p $!
         warn("default formats are encoded in ISO-8859-1")
       end
 			attr_accessor :font_no, :fmt_idx, :lock, :hidden, :style, :key_123
@@ -109,7 +112,7 @@ module Spreadsheet
       def to_s(target_encoding=nil)
         fmt_str = @@fmt_strs[@fmt_idx].to_s
         if(target_encoding)
-          Iconv.new(target_encoding, @encoding).iconv(fmt_str)
+          fmt_str.code_a2b(@encoding,target_encoding)
         else
           fmt_str.dup
         end

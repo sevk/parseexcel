@@ -24,6 +24,16 @@
 
 require 'parseexcel/olestorage'
 require 'iconv'
+class String
+   def code_a2b(a,b)
+     if RUBY_VERSION > '1.9' and defined? Encoding::Converter
+       tmp = Encoding::Converter.new(a,b, :universal_newline => true)
+       tmp.convert self
+     else
+       Iconv.conv("#{b}//IGNORE","#{a}//IGNORE",self)
+     end
+   end
+end
 
 module Spreadsheet
 	module ParseExcel
@@ -98,9 +108,9 @@ module Spreadsheet
 				def to_s(target_encoding=nil)
 					if(target_encoding)
             begin
-						  Iconv.new(target_encoding, @encoding).iconv(@value)
+              @value.code_a2b(@encoding, target_encoding)
             rescue
-						  Iconv.new(target_encoding, 'ascii').iconv(@value.to_s)
+              @value.code_a2b('ascii', target_encoding)
             end
 					else
 						@value.to_s
@@ -108,7 +118,7 @@ module Spreadsheet
 				end
 				def font
 				  @book.font(@format.font_no)
-			  end
+			  	end
 				def type 
 					@format.cell_type(self) if @format
 				end
@@ -147,7 +157,7 @@ module Spreadsheet
 			end
       def name(target_encoding=nil)
         if(target_encoding)
-          Iconv.new(target_encoding, 'UTF-16LE').iconv(@name.to_s)
+          @name.to_s.code_a2b('UTF-16LE',target_encoding)
         else
           @name
         end
